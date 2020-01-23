@@ -482,6 +482,7 @@ PVOID OsrSPCreateScsiDevice(IN PVOID POSRGHandle,IN ULONG PathId,
                             IN BOOLEAN BReadOnlyDevice,
                             PINQUIRYDATA PInquiryData, ULONG ExtraStackLocations)
 {
+    UNREFERENCED_PARAMETER(ExtraStackLocations);
 	POSR_DEVICE_EXTENSION	pDevExt = (POSR_DEVICE_EXTENSION) POSRGHandle;
 	POSR_VM_DEVICE			pOsrDev = NULL;
 	KIRQL		lockHandle;
@@ -662,6 +663,7 @@ void OsrSPDecOutstandingIoCount(IN PVOID POSRLHandle)
 ///////////////////////////////////////////////////////////////////////////////
 PDEVICE_OBJECT OsrSpGetDeviceObject(IN PVOID POSRLHandle)
 {
+    UNREFERENCED_PARAMETER(POSRLHandle);
 	OsrTracePrint(TRACE_LEVEL_VERBOSE,OSRVMINIPT_DEBUG_FUNCTRACE,(__FUNCTION__": Enter\n"));
 	DbgBreakPoint();
 	OsrTracePrint(TRACE_LEVEL_VERBOSE,OSRVMINIPT_DEBUG_FUNCTRACE,(__FUNCTION__": Exit\n"));
@@ -977,6 +979,7 @@ void    OsrSpCompleteSrb(IN PVOID POSRLHandle,PSCSI_REQUEST_BLOCK PSrb)
 ///////////////////////////////////////////////////////////////////////////////
 BOOLEAN OsrSPCanUserStart(IN PVOID POSRGHandle) 
 {
+    UNREFERENCED_PARAMETER(POSRGHandle);
 	return TRUE;
 }
 
@@ -1020,6 +1023,7 @@ PUCHAR OsrSpPrintSCSICDBOperation(UCHAR Operation)
 
 void OsrSpPrintCdb10(PCDB PCdb)
 {
+    UNREFERENCED_PARAMETER(PCdb);
     OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
 		("Printing Generic CDB10 Structure.\n"));
 
@@ -1057,6 +1061,7 @@ void OsrSpPrintCdb10(PCDB PCdb)
 
 VOID OsrSpPrintCdb12(PCDB PCdb)
 {
+    UNREFERENCED_PARAMETER(PCdb);
     OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
 		("Printing Generic CDB12 Structure.\n"));
 
@@ -1098,7 +1103,7 @@ VOID OsrSpPrintCdb12(PCDB PCdb)
 
 VOID OsrSpPrintModeSense(UCHAR Type,PCDB PCdb)
 {
-
+    UNREFERENCED_PARAMETER(PCdb);
     switch(Type) {
 
         case SCSIOP_MODE_SENSE:
@@ -1110,8 +1115,8 @@ VOID OsrSpPrintModeSense(UCHAR Type,PCDB PCdb)
 				("\tOperationCode = %s.\n",(CCHAR*) OsrSpPrintSCSICDBOperation(PCdb->MODE_SENSE.OperationCode)));
             OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
 				("\tDdb = %x.\n",(PCdb->MODE_SENSE.Dbd & 0x08) >> 3));
-            OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
-				("\tLogicalUnitNumber = %x.\n",(PCdb->MODE_SENSE.LogicalUnitNumber & 0xE0) >> 5));
+            /*OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
+				("\tLogicalUnitNumber = %x.\n",(PCdb->MODE_SENSE.LogicalUnitNumber & 0xE0) >> 5));*/
             OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
 				("\tPageCode = %x\n",PCdb->MODE_SENSE.PageCode & 0x3F));
             OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
@@ -1134,8 +1139,8 @@ VOID OsrSpPrintModeSense(UCHAR Type,PCDB PCdb)
 				("\tOperationCode = %s.\n",(CCHAR*) OsrSpPrintSCSICDBOperation(PCdb->MODE_SENSE10.OperationCode)));
             OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
 				("\tDdb = %x.\n",(PCdb->MODE_SENSE10.Dbd & 0x08) >> 3));
-            OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
-				("\tLogicalUnitNumber = %x.\n",(PCdb->MODE_SENSE10.LogicalUnitNumber & 0xE0) >> 5));
+            /*OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
+				("\tLogicalUnitNumber = %x.\n",(PCdb->MODE_SENSE10.LogicalUnitNumber & 0xE0) >> 5));*/
             OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
 				("\tPageCode = %x\n",PCdb->MODE_SENSE10.PageCode & 0x3F));
             OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
@@ -1189,6 +1194,10 @@ VOID OsrSpPrintModeSense(UCHAR Type,PCDB PCdb)
 ///////////////////////////////////////////////////////////////////////////////
 VOID OsrSpPrintScsiInquiryData(UCHAR Bus,UCHAR Target,UCHAR Lun,PINQUIRYDATA PInquiryData)
 {
+    UNREFERENCED_PARAMETER(PInquiryData);
+    UNREFERENCED_PARAMETER(Lun);
+    UNREFERENCED_PARAMETER(Target);
+    UNREFERENCED_PARAMETER(Bus);
     OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,
 		("InquiryData: Device At BUS %d, Target %d, Lun %d\n",Bus,Target,Lun));
     OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB,

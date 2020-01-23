@@ -1,5 +1,9 @@
 # Prerequisites
 *.d
+.vs/
+*x64*
+*Debug*
+*Release*
 
 # Compiled Object files
 *.slo

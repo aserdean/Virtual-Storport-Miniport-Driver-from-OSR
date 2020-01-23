@@ -121,7 +121,10 @@ ULONG OsrUserGetSrbExtensionSize(VOID)
 NTSTATUS OsrUserInitialize(PVOID OsrSpHandle,PDEVICE_OBJECT Pdo,
 						   PVOID* PPUserGlobalInfoHandle,PULONG PNodeNumber)
 {
-    UNICODE_STRING subPath;
+    UNREFERENCED_PARAMETER(PNodeNumber);
+    UNREFERENCED_PARAMETER(Pdo);
+    UNICODE_STRING subPath = { 0 };
+    UNREFERENCED_PARAMETER(subPath);
 
     OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_USER,
 		(__FUNCTION__": Entered.\n"));
@@ -292,8 +295,11 @@ NTSTATUS OsrUserProcessIoCtl(IN PVOID PUserGlobalHandle,IN PIRP PIrp)
 {
     PIO_STACK_LOCATION			irpStack;
     NTSTATUS					status;
-    ULONG						inlen, outlen;
-    PVOID						buffer;
+    ULONG						inlen = 0, outlen = 0;
+    PVOID						buffer = NULL;
+    UNREFERENCED_PARAMETER(inlen);
+    UNREFERENCED_PARAMETER(outlen);
+    UNREFERENCED_PARAMETER(buffer);
     PUSER_GLOBAL_INFORMATION	pGInfo = (PUSER_GLOBAL_INFORMATION) PUserGlobalHandle;
 
     USER_GLOBAL_VALID(pGInfo);
@@ -691,7 +697,8 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
             //
             ULARGE_INTEGER  startingLbn = {0,0};
             ULONG           readLength = 0;
-            PFOUR_BYTE      pTmp;
+            PFOUR_BYTE      pTmp = NULL;
+            UNREFERENCED_PARAMETER(pTmp);
             PCDB            pReadCdb = (PCDB) &PSrb->Cdb[0];
             ULONG           bytesRead;
             ULONG           numBlocks;
@@ -774,7 +781,8 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
             //
             ULARGE_INTEGER   startingLbn = {0,0};
             ULONG           writeLength = 0;
-            PFOUR_BYTE      pTmp;
+            PFOUR_BYTE      pTmp = NULL;
+            UNREFERENCED_PARAMETER(pTmp);
             PCDB            pReadCdb = (PCDB) &PSrb->Cdb[0];
             ULONG           bytesWritten;
             ULONG           numBlocks;
@@ -910,7 +918,7 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
             goto completeRequest;
 
         case SCSIOP_INQUIRY             : {// 0x12
-            PCDB                    pCdb = (PCDB) &PSrb->Cdb;
+            PCDB                    pCdbTemp = (PCDB) &PSrb->Cdb;
             PUCHAR                  pBuffer = (PUCHAR) OsrSpGetSrbDataAddress(pIInfo->OsrSPLocalHandle,PSrb);
             PINQUIRYDATA            pInquiryData;
 
@@ -923,7 +931,7 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
             //
             // We don't support this, so abort the request.
             //
-            if(pCdb->CDB6INQUIRY3.EnableVitalProductData) {
+            if(pCdbTemp->CDB6INQUIRY3.EnableVitalProductData) {
                 OsrTracePrint(TRACE_LEVEL_ERROR,OSRVMINIPT_DEBUG_SRB_USER,
 				    ("SCSIOP_INQUIRY: EVPD bit set, not supported.\n"));
                 status = ProcessScsiCommandError(PSrb);
@@ -933,7 +941,7 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
             //
             // If the evpd bit is not set, PageCode better be 0.
             //
-            if(pCdb->CDB6INQUIRY3.PageCode) {
+            if(pCdbTemp->CDB6INQUIRY3.PageCode) {
                 OsrTracePrint(TRACE_LEVEL_ERROR,OSRVMINIPT_DEBUG_SRB_USER,
 				    ("SCSIOP_INQUIRY: EVPD bit not set, PageCode not 0. Error.\n"));
                 status = ProcessScsiCommandError(PSrb);
@@ -1016,7 +1024,7 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
                 // required.  If we need more we'll add it here.
                 //
 
-                PCDB                    pCdb = (PCDB) &PSrb->Cdb;
+                PCDB                    pCdbTemp = (PCDB) &PSrb->Cdb;
                 PMODE_PARAMETER_HEADER  pModeHeader;
                 PUCHAR                  pBuffer = (PUCHAR) 
 											OsrSpGetSrbDataAddress(pIInfo->OsrSPLocalHandle,PSrb);
@@ -1032,7 +1040,7 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
 
                 RtlZeroMemory(pModeHeader,PSrb->DataTransferLength);
 
-                switch(pCdb->MODE_SENSE.PageCode) {
+                switch(pCdbTemp->MODE_SENSE.PageCode) {
 
                     case MODE_SENSE_CURRENT_VALUES:
                         {
@@ -1068,7 +1076,7 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
                     default:
                         OsrTracePrint(TRACE_LEVEL_INFORMATION,OSRVMINIPT_DEBUG_SRB_USER,
 							("MODE_SENSE: Received request for unhandled"
-							" mode page %d.\n",pCdb->MODE_SENSE.PageCode));
+							" mode page %d.\n", pCdbTemp->MODE_SENSE.PageCode));
                         pModeHeader->ModeDataLength = sizeof(MODE_PARAMETER_HEADER)-
                             sizeof(pModeHeader->ModeDataLength);
                         pModeHeader->MediumType = 0;
@@ -1080,7 +1088,8 @@ NTSTATUS OsrUserHandleSrb(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb)
                                 pModeHeader->DeviceSpecificParameter = 0;  // Writeable Device
                             }
                         } __except(EXCEPTION_EXECUTE_HANDLER) {
-                            NTSTATUS status = GetExceptionCode();
+                            NTSTATUS status_exception = GetExceptionCode();
+                            UNREFERENCED_PARAMETER(status_exception);
                             //Irp->IoStatus.Information = 0;
                             PSrb->SrbStatus = SRB_STATUS_ERROR;
                             goto completeRequest;
@@ -1294,6 +1303,7 @@ BOOLEAN  OsrUserIsDeviceReadOnly(IN PVOID UserLocalInfoHandle)
     USER_INSTANCE_VALID(pIInfo);
 
     PCONNECTION_LIST_ENTRY  pConnectionInformation = pIInfo->ConnectionInformation;
+    UNREFERENCED_PARAMETER(pConnectionInformation);
 
     return FALSE;
 }
@@ -1329,6 +1339,7 @@ VOID OsrUserGetDiskCapacity(IN PVOID UserLocalInfoHandle,ULONG* PNumberOfBlocks,
 {
     PUSER_INSTANCE_INFORMATION pIInfo = (PUSER_INSTANCE_INFORMATION) UserLocalInfoHandle;
     PCONNECTION_LIST_ENTRY  pConnectionInformation = pIInfo->ConnectionInformation;
+    UNREFERENCED_PARAMETER(pConnectionInformation);
     ULONG length;
     ULONG size;
 

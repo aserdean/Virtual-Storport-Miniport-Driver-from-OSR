@@ -35,8 +35,10 @@
 NTSTATUS OsrVmHandleRemoveDevice(IN POSR_DEVICE_EXTENSION PDevExt,
                      IN PSCSI_PNP_REQUEST_BLOCK  PSrb)
 {
+	UNREFERENCED_PARAMETER(PDevExt);
     NTSTATUS                  status = STATUS_SUCCESS;
     PSTOR_DEVICE_CAPABILITIES pStorageCapabilities = (PSTOR_DEVICE_CAPABILITIES)PSrb->DataBuffer;
+	UNREFERENCED_PARAMETER(pStorageCapabilities);
 
     PSrb->SrbStatus = SRB_STATUS_SUCCESS;
 
@@ -46,6 +48,7 @@ NTSTATUS OsrVmHandleRemoveDevice(IN POSR_DEVICE_EXTENSION PDevExt,
 NTSTATUS OsrVmHandleQueryCapabilities(IN POSR_DEVICE_EXTENSION PDevExt,
 									  IN PSCSI_PNP_REQUEST_BLOCK PSrb)
 {
+	UNREFERENCED_PARAMETER(PDevExt);
     NTSTATUS                  status = STATUS_SUCCESS;
     PSTOR_DEVICE_CAPABILITIES pStorageCapabilities = (PSTOR_DEVICE_CAPABILITIES)PSrb->DataBuffer;
 

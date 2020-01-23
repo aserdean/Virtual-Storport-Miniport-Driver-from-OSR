@@ -133,13 +133,17 @@ extern INQUIRY_DEVICE_TYPE DeviceTypeInfo[] = {
 NTSTATUS CreateConnection(PUSER_GLOBAL_INFORMATION PGInfo, PCONNECT_IN PConnectInfo)
 {
     NTSTATUS            status = STATUS_UNSUCCESSFUL;
-    IO_STATUS_BLOCK     ioStatus;
+    IO_STATUS_BLOCK     ioStatus = { 0 };
     BOOLEAN             bInserted = FALSE;
-	OBJECT_ATTRIBUTES   objectAttributes;
-    UNICODE_STRING      uString;
+    OBJECT_ATTRIBUTES   objectAttributes = { 0 };
+    UNREFERENCED_PARAMETER(objectAttributes);
+    UNICODE_STRING      uString = { 0 };
+    UNREFERENCED_PARAMETER(uString);
+    UNREFERENCED_PARAMETER(ioStatus);
     KIRQL               oldIrql;
     GUID                tmpGuid;
-    ULONG               bytesReturned;
+    ULONG               bytesReturned = 0;
+    UNREFERENCED_PARAMETER(bytesReturned);
 
 	OsrTracePrint(TRACE_LEVEL_VERBOSE,OSRVMINIPT_DEBUG_FUNCTRACE,(__FUNCTION__": Enter\n"));
 
@@ -424,6 +428,7 @@ NTSTATUS EnumerateActiveConnections(PUSER_GLOBAL_INFORMATION PGInfo,PIRP Irp)
     PGETACTIVELIST_OUT      pActiveList = (PGETACTIVELIST_OUT) Irp->AssociatedIrp.SystemBuffer;
     PACTIVELIST_ENTRY_OUT   pNextEntry = &pActiveList->ActiveEntry[0];
     ULONG                   count = 0;
+    UNREFERENCED_PARAMETER(count);
     ULONG                   countRemaining;
     NTSTATUS                status = STATUS_BUFFER_OVERFLOW;
 
@@ -607,10 +612,13 @@ BOOLEAN FindConnectionMatch(PUSER_GLOBAL_INFORMATION PGInfo, PCONNECT_IN PConnec
 NTSTATUS DeleteConnectionEntry(PUSER_GLOBAL_INFORMATION PGInfo,PCONNECTION_LIST_ENTRY PCle,
 							   PCONNECT_IN PConnectInfo)
 {
+    UNREFERENCED_PARAMETER(PConnectInfo);
     KIRQL		lockHandle;
     NTSTATUS                status = STATUS_OBJECT_NAME_NOT_FOUND;
     BOOLEAN                 found = FALSE;
-    PCONNECTION_LIST_ENTRY  pEntry;
+    PCONNECTION_LIST_ENTRY  pEntry = NULL;
+    UNREFERENCED_PARAMETER(pEntry);
+    UNREFERENCED_PARAMETER(found);
 
     OsrAcquireSpinLock(&PGInfo->ConnectionListLock,&lockHandle);
 
@@ -685,8 +693,9 @@ VOID InitializeScsiIds()
 void UpdateConnectionListInRegistry(PUSER_GLOBAL_INFORMATION PGInfo)
 {
     PCONNECT_IN             pConnectIn = NULL;
-    KIRQL		lockHandle;
+    KIRQL		            lockHandle;
     BOOLEAN                 found = FALSE;
+    UNREFERENCED_PARAMETER(found);
     PCONNECTION_LIST_ENTRY  pEntry;
     ULONG                   offset = 0;
     UNICODE_STRING          subPath;
@@ -749,6 +758,7 @@ void UpdateConnectionListInRegistry(PUSER_GLOBAL_INFORMATION PGInfo)
 
         BOOLEAN exceeded = RegistryWriteSubValue(&OsrRegistryPath,&subPath,L"ConnectInfo", 
                                       REG_BINARY,(PUCHAR) pConnectIn,size);
+        UNREFERENCED_PARAMETER(exceeded);
 
         ExFreePool(pConnectIn);
 
@@ -766,6 +776,7 @@ NoConnections:
 
     BOOLEAN exceeded = RegistryWriteSubValue(&OsrRegistryPath,&subPath,L"ConnectInfo", 
                                   REG_BINARY,(PUCHAR) &empty,sizeof(empty));
+    UNREFERENCED_PARAMETER(exceeded);
 
 }
 
@@ -773,6 +784,7 @@ void DeleteConnectionListInRegistry(PUSER_GLOBAL_INFORMATION PGInfo)
 {
     ULONG           empty = 0;
     UNICODE_STRING  subPath;
+    UNREFERENCED_PARAMETER(PGInfo);
 
     RtlInitUnicodeString(&subPath,L"\\Parameters");
 
@@ -822,6 +834,7 @@ NTSTATUS DeleteConnection(PUSER_GLOBAL_INFORMATION PGInfo,PCONNECT_IN PDisconnec
     NTSTATUS                status = STATUS_UNSUCCESSFUL;
     PCONNECTION_LIST_ENTRY  pEntryToDelete;
     BOOLEAN                 bVolumeServerBeingUsed = FALSE;
+    UNREFERENCED_PARAMETER(bVolumeServerBeingUsed);
     PUSER_INSTANCE_INFORMATION PIInfo;
     ULONG                   targetId = 0;
     ULONG                   busId = 0;
@@ -1143,7 +1156,7 @@ BOOLEAN RegistryReadBinarySubValue(PUNICODE_STRING RegistryPath, PUNICODE_STRING
     // for trailing NULL!
     //
 
-    path = (PWSTR) ExAllocatePoolWithTag(NonPagedPool,RegistryPath->Length+SubPath->Length+sizeof(WCHAR), 'tsOS');
+    path = (PWSTR) ExAllocatePoolWithTag(NonPagedPool, RegistryPath->Length + SubPath->Length+sizeof(WCHAR), 'tsOS');
 
     if (!path) {
 
@@ -1332,7 +1345,7 @@ BOOLEAN RegistryWriteSubValue(PUNICODE_STRING RegistryPath, PUNICODE_STRING SubP
     // for trailing NULL!
     //
 
-    path = (PWSTR) ExAllocatePoolWithTag(NonPagedPool,RegistryPath->Length+SubPath->Length+sizeof(WCHAR), 'tsOS');
+    path = (PWSTR) ExAllocatePoolWithTag(NonPagedPool,RegistryPath->Length + SubPath->Length+sizeof(WCHAR), 'tsOS');
 
     if (!path) {
 
@@ -1518,6 +1531,8 @@ void Get_CRC_CheckSum(PVOID pBuffer, ULONG ulSize, PULONG pulSeed)
 ///////////////////////////////////////////////////////////////////////////////
 void DoClose(PUSER_GLOBAL_INFORMATION PGInfo,PCONNECTION_LIST_ENTRY PEntry)
 {
+    UNREFERENCED_PARAMETER(PEntry);
+    UNREFERENCED_PARAMETER(PGInfo);
 }
 
 
@@ -1621,6 +1636,7 @@ NTSTATUS DoRead(PCONNECTION_LIST_ENTRY PEntry,
             BOOLEAN BNonCached)
 {
     ULONG readLength = Length;
+    UNREFERENCED_PARAMETER(BNonCached);
 
     //
     // We have been requested to do a read.   So we need to read from
@@ -1686,6 +1702,7 @@ NTSTATUS DoWrite(PCONNECTION_LIST_ENTRY PEntry,
                             BOOLEAN BNonCached)
 {
     ULONG writeLength = Length;
+    UNREFERENCED_PARAMETER(BNonCached);
 
     //
     // We have been requested to do a read.   So we need to read from
@@ -1812,7 +1829,7 @@ NTSTATUS CreateMultiSZ(PUNICODE_STRING MultiString,PCSTR StringArray[])
         // Push the buffer location up and reduce the maximum count
         //
 
-        unicodeEntry.Buffer = (PWSTR) ((PSTR) unicodeEntry.Buffer) + 
+        unicodeEntry.Buffer = (PWSTR)((PSTR)unicodeEntry.Buffer) + 
 			unicodeEntry.Length + sizeof(WCHAR);
         unicodeEntry.MaximumLength -= unicodeEntry.Length + sizeof(WCHAR);
 
@@ -1865,7 +1882,8 @@ NTSTATUS OsrUserReadData(IN PVOID UserLocalInfoHandle,PSCSI_REQUEST_BLOCK PSrb,
                          ULONG ReadLength,PULONG PBytesRead)
 {
     PUSER_INSTANCE_INFORMATION pIInfo = (PUSER_INSTANCE_INFORMATION) UserLocalInfoHandle;
-    KIRQL               oldIrql;
+    KIRQL               oldIrql = KeGetCurrentIrql();
+    UNREFERENCED_PARAMETER(oldIrql);
 
 	OsrTracePrint(TRACE_LEVEL_VERBOSE,OSRVMINIPT_DEBUG_FUNCTRACE,(__FUNCTION__": Enter\n"));
 

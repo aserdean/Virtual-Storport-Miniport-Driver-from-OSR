@@ -128,9 +128,8 @@ void DeleteDevicesThreadStart(PVOID Context)
 		}
 
 		OsrAcquireSpinLock(&pDevExt->DeviceListLock,&lockHandle);
-
 		for(PLIST_ENTRY pEntry = pDevExt->DeviceList.Flink;
-			pEntry != &pDevExt->DeviceList; pEntry = pEntry->Flink) {
+			pEntry && pEntry != &pDevExt->DeviceList; pEntry = pEntry->Flink) {
 
 			pDevice = (POSR_VM_DEVICE) CONTAINING_RECORD(pEntry,OSR_VM_DEVICE,ListEntry);
 
@@ -243,6 +242,9 @@ ULONG OsrHwFindAdapter(IN PVOID PDevExt,
 					   IN OUT PPORT_CONFIGURATION_INFORMATION PConfigInfo,
 					   IN PBOOLEAN PBAgain)
 {
+	UNREFERENCED_PARAMETER(PBAgain);
+	UNREFERENCED_PARAMETER(PArgumentString);
+	UNREFERENCED_PARAMETER(PBusInformation);
 	POSR_DEVICE_EXTENSION	pDevExt = (POSR_DEVICE_EXTENSION) PDevExt;
 	NTSTATUS				status;
 
@@ -630,7 +632,6 @@ BOOLEAN OsrHwStartIo(IN PVOID PDevExt,
 {
 	POSR_DEVICE_EXTENSION pDevExt = (POSR_DEVICE_EXTENSION) PDevExt;
     UCHAR    srbStatus = SRB_STATUS_INVALID_REQUEST;
-    BOOLEAN  bFlag;
     NTSTATUS status;
     BOOLEAN  bSrbCompleted = TRUE;
 
@@ -813,6 +814,7 @@ VOID OsrHwProcessServiceRequest(IN PVOID PDevExt,
 ///////////////////////////////////////////////////////////////////////////////
 VOID OsrHwCompleteServiceRequest(IN PVOID PDevExt)
 {
+	UNREFERENCED_PARAMETER(PDevExt);
     OsrTracePrint(TRACE_LEVEL_VERBOSE,OSRVMINIPT_DEBUG_FUNCTRACE,
 				("OsrHwCompleteServiceRequest Enter\n"));
 
@@ -864,6 +866,7 @@ VOID OsrHwFreeAdapterResources(IN PVOID PDevExt)
 				" completed\n"));
         } __except(EXCEPTION_EXECUTE_HANDLER) {
 			NTSTATUS status = GetExceptionCode();
+			UNREFERENCED_PARAMETER(status);
 			OsrTracePrint(TRACE_LEVEL_ERROR,OSRVMINIPT_DEBUG_PNP_INFO,
 				("OsrHwFreeAdapterResources: OsrUserDeleteGlobalInformation"
 				" exception 0x%x\n",status));
